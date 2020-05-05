@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8"></meta>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    ></meta>
+
+    <!-- Another CSS -->
+
+    <style>
+        ul, #myUL {
+          list-style-type: none;
+        }
+        
+        #myUL {
+          margin: 0;
+          padding: 0;
+        }
+        
+        .box {
+          cursor: pointer;
+          -webkit-user-select: none; /* Safari 3.1+ */
+          -moz-user-select: none; /* Firefox 2+ */
+          -ms-user-select: none; /* IE 10+ */
+          user-select: none;
+        }
+        
+        .box::before {
+          content: "\2610";
+          color: black;
+          display: inline-block;
+          margin-right: 6px;
+        }
+        
+        .check-box::before {
+          content: "\2611"; 
+          color: dodgerblue;
+        }
+        
+        .nested {
+          display: none;
+        }
+        
+        .active {
+          display: block;
+        }
+        </style>
+
+
+    <!-- Bootstrap CSS -->
+
+    <link
+        rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous"
+    ></link>
+
+    <!-- Title -->
+
+    <title>Detector de copias</title>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a
+                class="navbar-brand"
+                href="#"
+            >
+                <img
+                    src="https://fonts.gstatic.com/s/i/materialicons/android/v6/24px.svg?download=true"
+                    width="33"
+                    height="33"
+                    alt=""
+                >
+            </a>
+
+            <div
+                class="collapse navbar-collapse"
+                id="navbarSupportedContent"
+            >
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item dropdown">
+                        <a
+                            class="nav-link dropdown-toggle"
+                            href="#"
+                            id="navbarDropdown"
+                            role="button"
+                            data-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                        >Archivo</a>
+
+                        <div
+                            class="dropdown-menu"
+                            aria-labelledby="navbarDropdown"
+                        >
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                            >Guardar</a>
+
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                            >Guardar como</a>
+
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                            >Abrir</a>
+
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                            >Descargar</a>
+
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                            >Reporte</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item active">
+                        <a
+                            class="nav-link"
+                            href="#"
+                        >
+                            Añadir pestaña
+
+                            <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a
+                            class="nav-link"
+                            href="#"
+                        >Compilar</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <br>
+
+        <div class="container-fluid">
+            <div class="col-md-12">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                      <a class="nav-link active" id="doc1-tab" data-toggle="tab" href="#doc1" role="tab" aria-controls="home" aria-selected="true">Documento 1</a>
+                    </li>
+                  </ul>
+                  <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="doc1" role="tabpanel" aria-labelledby="home-tab">
+                        <div class = "card-top">
+                            <div class="list-group" id="editor" style="height: 300px; position: relative;"></div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Salida:</h5><br>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <br><br><br><br><br><br><br><br><br><br><br>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-striped">
+                                        <thead>
+                                          <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Tipo</th>
+                                            <th scope="col">Linea</th>
+                                            <th scope="col">Columna</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          <tr>
+                                            <th scope="row">1</th>
+                                            <td></td>
+                                            <td>12</td>
+                                            <td>123</td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                      <div class="card">
+                                        <div class="card-body">
+                                            <ul id="myUL">
+                                                <li><span class="caret">Class</span>
+                                                    <ul class="nested">
+                                                    <li>{</li>
+                                                    <li><span class="caret">Variable</span>
+                                                        <ul class="nested">
+                                                        <li>int</li>
+                                                        <li>a</li>
+                                                        </ul>
+                                                    </li>
+                                                    <li>}</li>                                                    
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                      </div>
+                                </div>    
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div id="editor-container"></div>
+
+    <!-- Scripts area -->
+    <script
+        src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"
+    ></script>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"
+    ></script>
+
+    <script
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"
+    ></script>
+
+    <script src="../ace-builds-master/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src = "app.js" type="text/javascript" charset="utf-8"></script>        
+</body>
+</html>
