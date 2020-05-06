@@ -12,7 +12,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
+	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("js/"))))
 	http.HandleFunc("/", index)
 	http.HandleFunc("/otherpage", index)
 	fmt.Printf("Servidor iniciado")
