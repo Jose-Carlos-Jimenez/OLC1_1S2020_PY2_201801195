@@ -824,7 +824,7 @@ case 20:return 32;
 case 21:return 33;
 case 22:return 34;
 case 23:return 35;
-case 24:return 50
+case 24:return 50;
 case 25:return 51;
 case 26:return 20;
 case 27:return 36;
