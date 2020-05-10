@@ -1,118 +1,108 @@
-/******************************************
- * Ejemplo desarrollado por Erick Navarro *
- * Blog: e-navarro.blogspot.com           *
- * Septiembre - 2015                      *
- ******************************************/
+import Bloque;
+import Usuario;
+import Arbol_AVL;
+import Lista_Simple;
+import Tabla_Hash;
+import Login;
 
-//declaracion de cadenas - Ronald Romero
-string var1;
-string var2;
-var1="prueba de ingreso";
-var2="otra prueba";
-
-//Se imprime un separador
-System.out.println("----------------");
-//Imprimimos un encabezado para ver si funciona la declaracion de string
-System.out.println("LA SIGUIENTE ES LA PRUEBA DE DECLARACION DE STRING");
-System.out.println(var1 & " --- " & var2);
-System.out.println(var1 & 5*5 & var2);
-var1=5*5 & "Hola";
-System.out.println("El nuevo valor de var1 es: " & var1);
-
-//Se imprime un separador
-System.out.println("----------------");
-
-
-//Se imprime el encabezado
-System.out.println("Tablas de" & " multiplicar");
-
-//Se declara la variable a, de tipo numero
-int a;
-//Se asigna a la variable a el valor 0
-a=0;
-//Se declara la variable c, de tipo numero
-int c;
-//Se asigna a la variable c el valor 0
-c=1;
-//Se imprime un separador
-System.out.println("----------------");
 /**
- * Se imprimen las tablas del 1 al 5 y 
- * para cada tabla, se imprimen los resultados
- * desde el uno hasta el 5, esto se hace con 
- * dos ciclos while anidados. 
- **/
-while(a<4+c){	
-	a=a+1;
-	int b;
-	b=0;
-	while(b<4+c){
-		b=b+1;
-		System.out.println(a & " * " & b & " = " & a * b);
-	}
-	System.out.println("----------------");
-}
+ *
+ * @author marco
+ */
+class OperacionDATA {
+    int a = 5;
+    String segundoParam = "Usted no anda fresco";
+    char caracter;
+    boolean booleano = false;
+    double valor_doble = 15.56;
+    int _hola, Primero, Ultimo;
+    int numero, no1 = 8, no2 = 4, no3;
 
-//Se asigna a la variable a el valor de 11
-a=11;
-/**
- * La variable b ya había sido declarada pero 
- * dentro del ámbito del primer ciclo while, 
- * entonces no existe en este ámbito por lo que 
- * debe declararse.
- **/
-int b;
-//Se asigna valor de 12 a b y valor de 13 a c
-b=12;
-c=13;
-/**
- * Se evalua si el valor de la variable a es 
- * mayor que 10, si el b es mayor que 11 y si
- * el de c es mayor que 12. 
- **/
-if(a>10){
-	System.out.println("a es mayor que 10.");
-	if(b>11){
-		System.out.println("a es mayor que 10 y b es mayor que 11.");
-		if(c>12){
-			System.out.println("a es mayor que 10, b es mayor que 11 y c es mayor que 12.");
-		}
-	}
-}else{
-	System.out.println("a es menor o igual que 10.");
-}
-
-System.out.println("----------------");
-
-int i;
-
-for(i = 0; i < 10 ; i++)
-{
-	System.out.println("Esto es un FOR, iteración: " & i);
-}
-
-a=1;
-switch(a){
-      case 1: 
-        System.out.println("Playa al ");
-      case 2: 
-        System.out.println("Luna ");
-      case 3: 
-        System.out.println("Selva de ");
-      case 4: 
-        System.out.println("Desierto de ");
-      case 5: 
-        System.out.println("Oceano ");
-      case 1: 
-        System.out.println("atardecer");
-      case 2: 
-        System.out.println("llena");
-      case 3: 
-        System.out.println("noche");
-      case 4:
-        System.out.println("Dia");
-      case 5: 
-        System.out.println("Azul");
-      default:
-        System.out.println("Esta es la acción por defecto.");
+    void main() {
+        System.out.println("HOLA RES");
+        String frescura = funcion_string();
+        int frescura2 = 5 * funcion_int(no1, frescura) + 9;
     }
+
+    void NoDevuelvoNada() {
+        System.out.println("NO DEVUELVO NADA");
+        for (int i = 0, a = 3; i < 10; i++) {
+            System.out.println("for");
+            if (booleano) {
+                for (int j = 0; j < (10 * 5) + 1; j++) {
+                    while (booleano) {
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+    String funcion_string() {
+        return "";
+    }
+
+    int funcion_int(int numeor1, String frescura) {
+        if (booleano) {
+            return 5;
+        } else if ((no1)) {
+            return 8;
+        } else {
+            return 3;
+        }
+    }
+
+    void eliminarUsuario(String busqueda) {
+        int actual = Primero;
+        int anterior = null;
+        boolean bandera = false;
+        if (Primero != null) {
+            while (actual != null
+                    && !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!(bandera)) {
+                // Usuario act = (Usuario) actual.getInformacion();
+                String carnet = getCarnet() + "";
+                if (busqueda == carnet) {
+                    bandera = true;
+                    break;
+                }
+                anterior = actual;
+                actual = getSiguiente();
+            }
+        }
+        if (bandera) {
+            if (actual == Primero) {
+                Primero = getSiguiente();
+            } else if (actual == Ultimo) {
+                Ultimo = anterior;
+                switch (busqueda) {
+                    case "hola":
+                        System.out.println();
+                        System.out.println("Pedo");
+                        break;
+                    case "adios":
+                        while (true) {
+                            if (true)
+                                System.out.print(obj);
+                        }
+                        break;
+                    default:
+                        boolean sigajalando = true;
+                        int k;
+                        for (k = 0; k <= 200; k++) {
+                            while (sigajalando) {
+                                System.out.println("Anda piola");
+                                if (k == 199) {
+                                    sigajalando = false;
+                                }
+                            }
+                        }
+                }
+            } else // en medio de la lista
+            {
+                setSiguiente(getSiguiente());
+            }
+        } else {
+            System.out.println("USUARIO NO ENCOTRADO EN LA LISTA SIMPLE");
+        }
+    }
+}

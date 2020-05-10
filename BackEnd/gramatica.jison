@@ -1,6 +1,6 @@
 /**
- * Ejemplo Intérprete Sencillo con Jison utilizando Nodejs en Ubuntu
- */
+* Ejemplo Intérprete Sencillo con Jison utilizando Nodejs en Ubuntu
+*/
 
 /* Definición Léxica */
 %lex
@@ -15,16 +15,18 @@
 
 "-"						return 'RESTA';
 "--" 					return 'DECREMENTO';
-"!"						return 'NOT';
 "!="					return 'DISTINTO';
+"!"						return 'NOT';
 \"[^\"]*\"				{ yytext = yytext.substr(1,yyleng-2); return 'LITERAL_STRING'; }
 "%"						return 'MODULO';
 "&&"					return 'AND';
 "("						return 'PAR_APERTURA';
 "(*-1)" 				return 'MENOS_UNARIO';
-[0-9]+\b				return 'LITERAL_INT';
 [0-9]+("."[0-9]+)?\b  	return 'LITERAL_DOUBLE';
-'([a-zA-Z]|\\n|\\t|\\r|\\\\|\\\")' return 'LITERAL_CHAR';
+[0-9]+\b				return 'LITERAL_INT';
+\'([^\\]|\\.?)\' 		return 'LITERAL_CHAR';
+"System.out.println"	return 'IMPRIMIR_L';
+"System.out.print"		return 'IMPRIMIR';
 ")" 					return 'PAR_CIERRE';
 "*"						return 'MULTIPLICACION';
 "."						return 'PUNTO';
@@ -63,13 +65,10 @@
 "if"					return 'IF';
 "import"				return 'IMPORT';
 "int"					return 'INT';
-"main"					return 'MAIN';
 "new"					return 'NEW';
 "return"				return 'RETURN';
 "String"				return 'STRING';
 "switch"				return 'SWITCH';
-"System.out.println"	return 'IMPRIMIR_L';
-"System.out.print"		return 'IMPRIMIR';
 "this"					return 'THIS';
 "true"					return 'LITERAL_TRUE';
 "void"					return 'VOID';
@@ -107,6 +106,7 @@ literal
 	|LITERAL_FALSE
 	|LITERAL_CHAR
 	|LITERAL_STRING
+	|methodinvocation
 	|IDENTIFICADOR
 ;
 
@@ -132,7 +132,6 @@ classorinterfacetype
 
 name
 	: IDENTIFICADOR
-	| name IDENTIFICADOR
 ;
 
 // Área de paquetes
@@ -180,6 +179,7 @@ classbodydeclaration
 // Producciones para la declaraciones
 fielddeclaration
 	: type variabledeclarators PUNTO_COMA
+	| type variabledeclarators IGUAL expression PUNTO_COMA
 ;
 
 variabledeclarators
@@ -188,8 +188,9 @@ variabledeclarators
 ;
 
 variabledeclarator
-	: IDENTIFICADOR IGUAL expression
-	| IDENTIFICADOR
+	: IDENTIFICADOR
+	| IDENTIFICADOR IGUAL expression
+	
 ;
 
 //Declaración de métodos
@@ -235,8 +236,14 @@ blockstatements
 ;
 
 blockstatement
-	: type variabledeclarators PUNTO_COMA
+	: localvariabledeclaration
 	| statement
+	| %empty
+;
+
+localvariabledeclaration
+	: type variabledeclarators PUNTO_COMA
+	| variabledeclarators PUNTO_COMA
 ;
 
 statement
@@ -246,29 +253,38 @@ statement
 	| ifthenelsestatement
 	| whilestatement
 	| forstatement
+	| printstatement
 ;
 
+printstatement
+	: IMPRIMIR PAR_APERTURA expressionlistprint PAR_CIERRE PUNTO_COMA
+	| IMPRIMIR_L PAR_APERTURA expressionlistprint PAR_CIERRE PUNTO_COMA
+	| IMPRIMIR_L PAR_APERTURA PAR_CIERRE PUNTO_COMA
+;
+
+expressionlistprint
+	:expressionlist SUMA expression
+	|expression
+;
 statementnoshortif
 	: statementwithouttrailingsubstatement
 	| labeledstatementnoshortif
 	| ifthenelsestatementnoshortif
 	| whilestatementnoshortif
 	| forstatementnoshortif
+	| variabledeclarators PUNTO_COMA
+	| printstatement
 ;
 
 statementwithouttrailingsubstatement
 	: block
-	| emptystatement
 	| expressionstatement
 	| switchstatement
 	| dostatement
 	| breakstatement
 	| continuestatement
 	| returnstatement
-;
-
-emptystatement
-	: COMA
+	| printstatement
 ;
 
 labeledstatement
@@ -295,11 +311,22 @@ ifthenstatement
 ;
 
 ifthenelsestatement
-	:IF PAR_APERTURA expression PAR_CIERRE statementnoshortif ELSE statement
+	:IF PAR_APERTURA expression PAR_CIERRE block ELSE elseifblocks
 ;
 
 ifthenelsestatementnoshortif
-	: IF PAR_APERTURA expression PAR_CIERRE statementnoshortif ELSE statementnoshortif
+	: IF PAR_APERTURA expression PAR_CIERRE statementnoshortif elseifblock
+;
+
+elseifblocks
+	: elseifblocks elseifblock
+	| elseifblock
+;
+
+elseifblock
+	: ELSE IF PAR_APERTURA expression PAR_CIERRE block 
+	| ELSE block
+	| %empty
 ;
 
 switchstatement
@@ -307,12 +334,13 @@ switchstatement
 ;
 
 switchblock
-	: LLAVE_APERTURA switchstatementgroups switchlabels LLAVE_CIERRE
+	: LLAVE_APERTURA switchblockstatementgroups switchlabels LLAVE_CIERRE
 ;
 
 switchblockstatementgroups
 	: switchblockstatementgroup
 	| switchblockstatementgroups switchblockstatementgroup
+	| %empty
 ;
 
 switchblockstatementgroup
@@ -322,6 +350,7 @@ switchblockstatementgroup
 switchlabels
 	: switchlabel
 	| switchlabels switchlabel
+	| %empty
 ;
 
 switchlabel
@@ -350,12 +379,13 @@ forstatementnoshortif
 ;
 
 forinit
-	: statementexpressionlist
+	: name IGUAL assignmentexpression
 	| type variabledeclarators
 ;
 
 forupdate
-	: statementexpressionlist
+	: IDENTIFICADOR SUMA SUMA
+	| IDENTIFICADOR RESTA RESTA
 ;
 
 statementexpressionlist
@@ -401,7 +431,7 @@ fieldaccess
 ;
 
 methodinvocation
-	: name PAR_APERTURA argumentlist PAR_CIERRE
+	: IDENTIFICADOR PAR_APERTURA argumentlist PAR_CIERRE
 	| primary PUNTO IDENTIFICADOR PAR_APERTURA argumentlist PAR_CIERRE
 ;
 
@@ -430,6 +460,7 @@ unaryexpression
 unaryexpressionnotplusminus
 	: postfixexpression
 	| NOT unaryexpression
+	| PAR_APERTURA expression PAR_CIERRE
 ;
 
 multiplicativeexpression
@@ -474,12 +505,6 @@ assignmentexpression
 	: conditionalorexpression
 ;
 
-lefthandside
-	: fielddeclaration
-	| fieldaccess
-;
-
 expression
 	: assignmentexpression
 ;
-// Por aquí vamos
