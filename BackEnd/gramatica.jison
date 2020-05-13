@@ -13,11 +13,11 @@
 "//".*										// comentario simple línea
 [/][*][^*]*[*]+([^/*][^*]*[*]+)*[/]			// comentario multiple líneas
 
-"-"						return 'RESTA';
 "--" 					return 'DECREMENTO';
+"-"						return 'RESTA';
 "!="					return 'DISTINTO';
 "!"						return 'NOT';
-\"[^\"]*\"				{ yytext = yytext.substr(1,yyleng-2); return 'LITERAL_STRING'; }
+\"([^\\]|\\.)*\"				{ yytext = yytext.substr(1,yyleng-2); return 'LITERAL_STRING'; }
 "%"						return 'MODULO';
 "&&"					return 'AND';
 "("						return 'PAR_APERTURA';
@@ -95,19 +95,19 @@
 
 // Inicio de la gramática
 goal
-	: compilationunit EOF 
+	: compilationunit EOF{return {root: $1}}
 ;
 
 // Estructura léxica
 literal
-	:LITERAL_INT
-	|LITERAL_DOUBLE
-	|LITERAL_TRUE
-	|LITERAL_FALSE
-	|LITERAL_CHAR
-	|LITERAL_STRING
-	|methodinvocation
-	|IDENTIFICADOR
+	:LITERAL_INT {$$ = $1}
+	|LITERAL_DOUBLE {$$ = $1}
+	|LITERAL_TRUE {$$ = $1}
+	|LITERAL_FALSE {$$ = $1}
+	|LITERAL_CHAR {$$ = $1}
+	|LITERAL_STRING {$$ = $1}
+	|methodinvocation {$$ = $1}
+	|IDENTIFICADOR {$$ = $1}
 ;
 
 // Tipos, valores y varibles
@@ -117,86 +117,87 @@ type
 ;
 
 primitivetype
-	: INT
-	| CHAR
+	: INT 
+	| CHAR 
 	| STRING
-	| BOOLEAN
-	| DOUBLE
+	| BOOLEAN 
+	| DOUBLE 
 ;
 
 classorinterfacetype
-	: name
+	: name 
 ;
 
 // Nombres
 
 name
-	: IDENTIFICADOR
+	: IDENTIFICADOR {$$ = $1}
 ;
 
 // Área de paquetes
 compilationunit
-	:importdeclarations typedeclarations
-; 
+	:importdeclarations typedeclarations {$$ = {imports:$1, clases: $2}}
+;
 
 importdeclarations
-	:importdeclaration 
-	|importdeclarations importdeclaration
+	:importdeclaration {$$ = [$1]}
+	|importdeclarations importdeclaration {$1.push($2); $$ = $1} 
 ;
 
 typedeclarations
-	:typedeclaration
-	|typedeclarations typedeclaration 
+	:typedeclaration {$$ = [$1]}
+	|typedeclarations typedeclaration{$1.push($2); $$ = $1} 
 ;
 
 importdeclaration
-	:IMPORT name PUNTO_COMA
-	|IMPORT name PUNTO MULTIPLICACION PUNTO_COMA
+	:IMPORT name PUNTO_COMA {$$ = {clase: $2}}
+	|IMPORT name PUNTO MULTIPLICACION PUNTO_COMA {$$ = {clase: $2}}
 ;
 
 typedeclaration
-	: classdeclaration
+	: classdeclaration {$$ = $1}
 	| PUNTO_COMA
 ;
 
 // Producciones para declarar clases
 classdeclaration
-	: CLASS IDENTIFICADOR LLAVE_APERTURA classbodydeclarations LLAVE_CIERRE
+	: CLASS IDENTIFICADOR LLAVE_APERTURA classbodydeclarations LLAVE_CIERRE 
+	{$$ = {nombre: $2, cuerpo: $4} }
 ;
 
 classbodydeclarations
-	: classbodydeclaration
-	| classbodydeclarations classbodydeclaration
+	: classbodydeclaration {$$ = [$1]}
+	| classbodydeclarations classbodydeclaration {$1.push($2) ;$$ = $1}
 ;
 
 classbodydeclaration
-	: fielddeclaration
-	| methoddeclaration
-	| constructordeclaration
+	: fielddeclaration {$$ = [$1]}
+	| methoddeclaration 
+	| constructordeclaration 
 	| %empty
 ;
 
 // Producciones para la declaraciones
 fielddeclaration
-	: type variabledeclarators PUNTO_COMA
-	| type variabledeclarators IGUAL expression PUNTO_COMA
+	: type variabledeclarators PUNTO_COMA {$$ = {operacion: "declaracion", tipo: $1, declaradas: $2}}
+	| type variabledeclarators IGUAL expression PUNTO_COMA {$$ = {operacion: "declaracion_asign",tipo: $1, declaradas: $2, valor: $4}}
 ;
 
 variabledeclarators
-	: variabledeclarator
-	| variabledeclarators COMA variabledeclarator
+	: variabledeclarator {$$ = [$1]}
+	| variabledeclarators COMA variabledeclarator {$1.push($3);$$ = $1}
 ;
 
 variabledeclarator
-	: IDENTIFICADOR
-	| IDENTIFICADOR IGUAL expression
+	: IDENTIFICADOR {$$ = $1}
+	| IDENTIFICADOR IGUAL expression {$$ = $1}
 	
 ;
 
 //Declaración de métodos
 methoddeclaration
-	: type IDENTIFICADOR PAR_APERTURA formalparameterlist PAR_CIERRE methodbody
-	| VOID IDENTIFICADOR PAR_APERTURA formalparameterlist PAR_CIERRE methodbody
+	: type IDENTIFICADOR PAR_APERTURA formalparameterlist PAR_CIERRE methodbody 
+	| VOID IDENTIFICADOR PAR_APERTURA formalparameterlist PAR_CIERRE methodbody 
 ;
 
 formalparameterlist
@@ -303,7 +304,7 @@ statementexpression
 	: postincrementexpression
 	| postdecrementexpression
 	| methodinvocation
-	| classinstancecreationexpression
+	| classinstancecreationexpression {$$ = $1}
 ;
 
 ifthenstatement
@@ -394,117 +395,110 @@ statementexpressionlist
 ;
 
 breakstatement
-	: BREAK PUNTO_COMA
+	: BREAK PUNTO_COMA {$$={instruccion: $1}}
 ;
 
 continuestatement
-	: CONTINUE PUNTO_COMA
+	: CONTINUE PUNTO_COMA {$$ = {instruccion: $1}}
 ;
 
 returnstatement
-	: RETURN expression PUNTO_COMA
-	| RETURN PUNTO_COMA
+	: RETURN expression PUNTO_COMA {$$= {instruccion: $1, valor: $2}}
+	| RETURN PUNTO_COMA {$$= {instruccion: $1, valor: "null"}}
 ;
 
 // Producciones para expresion
 primary
-	: literal
-	| THIS
-	| PAR_APERTURA expression  PAR_CIERRE
-	| classinstancecreationexpression
-	| fieldaccess
-	| methodinvocation
+	: literal {$$=$1}
+	| THIS {$$=$1}
+	| PAR_APERTURA expression  PAR_CIERRE {$$=$2}
+	| classinstancecreationexpression {$$=$1}
+	| fieldaccess {$$=$1}
+	| methodinvocation {$$=$1}
 ;
 
 classinstancecreationexpression
-	: NEW IDENTIFICADOR PAR_APERTURA argumentlist PAR_CIERRE
+	: NEW IDENTIFICADOR PAR_APERTURA argumentlist PAR_CIERRE {$$= {operacion: $1, id: $2, argumentos:[$4] }}
 ;
 
 argumentlist
-	: expression
-	| argumentlist COMA expression
+	: expression{$$=[$1]}
+	| argumentlist COMA expression {$1.push($3), $$=$1}
 	| %empty
 ;
 
 fieldaccess
-	: primary PUNTO	IDENTIFICADOR
+	: primary PUNTO	IDENTIFICADOR {$$={clase:"acceso_atributo", atributo: $3}}
 ;
 
 methodinvocation
-	: IDENTIFICADOR PAR_APERTURA argumentlist PAR_CIERRE
-	| primary PUNTO IDENTIFICADOR PAR_APERTURA argumentlist PAR_CIERRE
-;
-
-postfixexpression:
-	primary
-	name
-	postincrementexpression
-	postdecrementexpression
+	: IDENTIFICADOR PAR_APERTURA argumentlist PAR_CIERRE {$$ = {clase: "metodo", id: $1, argumentos: $4 }}
+	| primary PUNTO IDENTIFICADOR PAR_APERTURA argumentlist PAR_CIERRE {$$ = {clase: "metodo", id: $3, argumentos: $5 }}
 ;
 
 postincrementexpression
-	: postfixexpression SUMA SUMA
+	: IDENTIFICADOR SUMA SUMA {$$={operador:"+", operador:[$1,"1"]}}
 ;
 
 postdecrementexpression
-	: postfixexpression DECREMENTO
+	: IDENTIFICADOR DECREMENTO {$$={operador:"-", operador:[$1,"1"]}}
 ;
 
 unaryexpression 
-	: SUMA unaryexpression
-	| RESTA unaryexpression
-	| unaryexpressionnotplusminus
-	| literal
+	: RESTA expression {$$={operador: $1, operando: [$2]}}
+	| unaryexpressionnotplusminus {$$ = $1}
+	| literal {$$=$1}
 ;
 
 unaryexpressionnotplusminus
-	: postfixexpression
-	| NOT unaryexpression
-	| PAR_APERTURA expression PAR_CIERRE
+	: postincrementexpression {$$ = $1}
+	| postdecrementexpression {$$ = $1}
+	| NOT unaryexpression {$$={operador: $1, operando: [$2]}}
+	| PAR_APERTURA expression PAR_CIERRE {$$=$2}
 ;
 
 multiplicativeexpression
-	: unaryexpression
-	| multiplicativeexpression MULTIPLICACION unaryexpression
-	| multiplicativeexpression DIVISION unaryexpression
-	| multiplicativeexpression MODULO unaryexpression
-	| multiplicativeexpression POTENCIA unaryexpression
+	: unaryexpression {$$=$1}
+	| multiplicativeexpression MULTIPLICACION unaryexpression {$$={operador: $2, operandos:[$1,$2]}}
+	| multiplicativeexpression DIVISION unaryexpression {$$={operador: $2, operandos:[$1,$2]}}
+	| multiplicativeexpression MODULO unaryexpression {$$={operador: $2, operandos:[$1,$2]}}
+	| multiplicativeexpression POTENCIA unaryexpression {$$={operador: $2, operandos:[$1,$2]}}
 ;
 
 additiveexpression
-	: multiplicativeexpression
-	| additiveexpression SUMA multiplicativeexpression
-	| additiveexpression RESTA multiplicativeexpression
+	: multiplicativeexpression {$$=$1}
+	| additiveexpression SUMA multiplicativeexpression {$$={operador: $2, operandos:[$1,$2]}}
+	| additiveexpression RESTA multiplicativeexpression {$$={operador: $2, operandos:[$1,$2]}}
 ;
 
 relationalexpression
-	: additiveexpression
-	| relationalexpression MENOR_QUE additiveexpression
-	| relationalexpression MAYOR_QUE additiveexpression
-	| relationalexpression MENOR_IGUAL additiveexpression
-	| relationalexpression MAYOR_IGUAL	additiveexpression
+	: additiveexpression {$$=$1}
+	| relationalexpression MENOR_QUE additiveexpression{$$={operador: $2, operandos:[$1,$2]}}
+	| relationalexpression MAYOR_QUE additiveexpression {$$={operador: $2, operandos:[$1,$2]}}
+	| relationalexpression MENOR_IGUAL additiveexpression {$$={operador: $2, operandos:[$1,$2]}}
+	| relationalexpression MAYOR_IGUAL	additiveexpression {$$={operador: $2, operandos:[$1,$2]}}
 ;
 
 equalityexpression
-	: relationalexpression
-	| equalityexpression IGUALDAD relationalexpression
-	| equalityexpression DISTINTO relationalexpression
+	: relationalexpression {$$ = $1}
+	| equalityexpression IGUALDAD relationalexpression {$$={operador: $2, operandos:[$1,$2]}}
+	| equalityexpression DISTINTO relationalexpression {$$={operador: $2, operandos:[$1,$2]}}
 ;
 
 conditionalandexpression
-	: equalityexpression 
-	| conditionalandexpression AND equalityexpression
+	: equalityexpression {$$ = $1}
+	| conditionalandexpression AND equalityexpression {$$={operador: $2, operandos:[$1,$3]}}
 ;
 
 conditionalorexpression
-	: conditionalandexpression
-	| conditionalorexpression OR  conditionalandexpression
+	: conditionalandexpression { $$= $1}
+	| conditionalorexpression OR  conditionalandexpression { $$= {operador: $2, operandos: [$1,$3]}}
 ;
 
 assignmentexpression
-	: conditionalorexpression
+	: conditionalorexpression { $$= $1}
 ;
 
 expression
-	: assignmentexpression
+	: assignmentexpression { $$= $1}
 ;

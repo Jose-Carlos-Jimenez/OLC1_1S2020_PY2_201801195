@@ -53,7 +53,7 @@ function getAst(texto)
         ast = parser.parse(texto);
     
         // imrimimos en un archivo el contendio del AST en formato JSON
-        // fs.writeFileSync('./ast.json', JSON.stringify(ast, null, 2));
+        fs.writeFileSync('./ast.json', JSON.stringify(ast, null, 2));
     } catch (e) {
         console.error(e);
         return;
