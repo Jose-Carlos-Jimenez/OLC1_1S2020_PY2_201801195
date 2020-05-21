@@ -152,6 +152,7 @@ typedeclarations
 importdeclaration
 	:IMPORT name PUNTO_COMA {$$ = {clase: $2}}
 	|IMPORT name PUNTO MULTIPLICACION PUNTO_COMA {$$ = {clase: $2}}
+	| %empty
 ;
 
 typedeclaration
@@ -171,7 +172,7 @@ classbodydeclarations
 ;
 
 classbodydeclaration
-	: fielddeclaration {$$ = [$1]}
+	: fielddeclaration {$$ = $1}
 	| methoddeclaration 
 	| constructordeclaration 
 	| %empty

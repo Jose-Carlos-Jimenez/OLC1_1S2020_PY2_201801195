@@ -30,12 +30,13 @@ app.listen(3000, () => console.log('App running on port 3000.'));
 
 app.post('/parse', (req, res) =>
 {
-    console.log("\n<----------------- INICIO DE ANÁLISIS ------------------------->");
+    console.log("\n<---------------- INICIO DE ANÁLISIS ------------------->");
     var analyze = req.body.DATA;
     //console.log(analyze);
-    getAst(analyze.toString());
-    console.log("\n<------------------- FIN DE ANÁLISIS -------------------------->");
-    res.send();    
+    var ast = getAst(analyze.toString());
+    var respuesta = JSON.stringify(ast, null, 2);
+    res.send(respuesta);
+    console.log("\n<------------------ FIN DE ANÁLISIS -------------------->");   
 });
 
 app.get('/', (req, res) => 
@@ -53,7 +54,8 @@ function getAst(texto)
         ast = parser.parse(texto);
     
         // imrimimos en un archivo el contendio del AST en formato JSON
-        fs.writeFileSync('./ast.json', JSON.stringify(ast, null, 2));
+        //fs.writeFileSync('./ast.json', JSON.stringify(ast, null, 2));
+        return ast;
     } catch (e) {
         console.error(e);
         return;

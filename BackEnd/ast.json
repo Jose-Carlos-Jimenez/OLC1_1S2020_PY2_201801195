@@ -1,10 +1,58 @@
 {
-  "imports": {
-    "import": {
-      "clase_importada": "hola"
-    }
-  },
-  "clases": {
-    "tipo": "class"
+  "root": {
+    "imports": [
+      {
+        "clase": "hola"
+      },
+      {
+        "clase": "das"
+      },
+      {
+        "clase": "nel"
+      }
+    ],
+    "clases": [
+      {
+        "nombre": "Principal",
+        "cuerpo": [
+          {
+            "operacion": "declaracion",
+            "tipo": "int",
+            "declaradas": [
+              "a",
+              "b",
+              "c"
+            ]
+          },
+          {
+            "operacion": "declaracion",
+            "tipo": "String",
+            "declaradas": [
+              "r"
+            ]
+          },
+          {
+            "operacion": "declaracion",
+            "tipo": "char",
+            "declaradas": [
+              "c"
+            ]
+          },
+          "void"
+        ]
+      },
+      {
+        "nombre": "Secundaria",
+        "cuerpo": [
+          null
+        ]
+      },
+      {
+        "nombre": "Tercera",
+        "cuerpo": [
+          "Tercera"
+        ]
+      }
+    ]
   }
 }
