@@ -2,6 +2,9 @@
 %{
 	let count = 0;
 	let errors = [];
+
+	// Para las copias.
+	let clases = [];
 %}
 %lex
 
@@ -91,7 +94,7 @@
 
 // Inicio de la gramática
 goal
-	: compilationunit EOF{return {AST:$1,"Cantidad":count, "Errores":errors }}
+	: compilationunit EOF{return {AST:$1,"Cantidad":count, "Errores":errors, "Clases":clases }}
 	| EOF
 ;
 
@@ -155,13 +158,13 @@ importdeclaration
 ;
 
 typedeclaration
-	: classdeclaration {$$ = $1}
+	: classdeclaration {$$ = $1; clases.push($1)}
 	| PUNTO_COMA
 ;
 
 // Producciones para declarar clases
 classdeclaration
-	: CLASS IDENTIFICADOR LLAVE_APERTURA classbodydeclarations LLAVE_CIERRE {$$ = {nombre: $2, cuerpo: $4} }
+	: CLASS IDENTIFICADOR LLAVE_APERTURA classbodydeclarations LLAVE_CIERRE {$$ = {nombre: $2, cuerpo: $4};}
 ;
 
 classbodydeclarations

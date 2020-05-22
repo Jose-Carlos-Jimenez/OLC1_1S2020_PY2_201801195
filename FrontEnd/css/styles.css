@@ -45,9 +45,16 @@
 	color: lightsalmon;
 }
 
-#erroresT {
+#erroresT{
 	background-color: black;
 	color: yellow;
 	font-size:xx-small;
+	font-style: initial;
+}
+
+#copy{
+	background-color: black;
+	color: red;
+	font-size:x-small;
 	font-style: initial;
 }
