@@ -6,6 +6,7 @@ var editor2 = ace.edit("editor2");
 editor2.setTheme("ace/theme/terminal");
 editor2.session.setMode("ace/mode/java");
 
+var errores= [];
 
 function getText() {
   var editor = ace.edit("editor");
@@ -21,17 +22,17 @@ function getText() {
   })
   .then(function(res){return res.json();})
   .then(function(data){ 
+    console.log(data);
     treeView(data);
   });
-  
-  // Visualización del árbol.
-  
 }
 
 function treeView(json)
 {
   document.getElementById("treePlace").innerHTML = "";
-  document.getElementById("treePlace").appendChild(renderjson(json));
+  var render = renderjson(json.AST);
+  this.errores = json.Errores;
+  document.getElementById("treePlace").appendChild(render);
 }
 
 function openFile(e) {
@@ -43,7 +44,6 @@ function openFile(e) {
   reader.onload = function (e) {
     var contents = e.target.result;
     // Display file content
-    console.log(contents);
     displayContents(contents);
   };
   reader.readAsText(file);
@@ -51,69 +51,8 @@ function openFile(e) {
 
 function displayContents(contents) {
   var editor = ace.edit("editor");
+  editor.getSession().setValue("");
   editor.getSession().setValue(contents);
-}
-
-function getJson() {
-  var json = {
-    "root": {
-      "imports": [
-        {
-          "clase": "hola"
-        },
-        {
-          "clase": "das"
-        },
-        {
-          "clase": "nel"
-        }
-      ],
-      "clases": [
-        {
-          "nombre": "Principal",
-          "cuerpo": [
-            {
-              "operacion": "declaracion",
-              "tipo": "int",
-              "declaradas": [
-                "a",
-                "b",
-                "c"
-              ]
-            },
-            {
-              "operacion": "declaracion",
-              "tipo": "String",
-              "declaradas": [
-                "r"
-              ]
-            },
-            {
-              "operacion": "declaracion",
-              "tipo": "char",
-              "declaradas": [
-                "c"
-              ]
-            },
-            "void"
-          ]
-        },
-        {
-          "nombre": "Secundaria",
-          "cuerpo": [
-            null
-          ]
-        },
-        {
-          "nombre": "Tercera",
-          "cuerpo": [
-            "Tercera"
-          ]
-        }
-      ]
-    }
-  };
-  return json;
 }
 
 document.getElementById('file-input').addEventListener('change', openFile, false);

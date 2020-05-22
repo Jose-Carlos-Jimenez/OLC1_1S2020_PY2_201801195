@@ -1,8 +1,8 @@
-°°°/**
-* Ejemplo Intérprete Sencillo con Jison utilizando Nodejs en Ubuntu
-*/
-
 /* Definición Léxica */
+%{
+	let count = 0;
+	let errors = [];
+%}
 %lex
 
 %options case-sensitive
@@ -75,8 +75,8 @@
 "void"					return 'VOID';
 "while"					return 'WHILE';
 ([a-zA-Z]|_)[a-zA-Z0-9_]*	return 'IDENTIFICADOR';
-<<EOF>>				return 'EOF';
-
+<<EOF>>					return 'EOF';
+. 						{count++; errors.push({"Lexema":yytext,"Columna":yylloc.first_column, "Fila":yylloc.first_line, "Descripcion":"Léxico"})}
 
 /lex
 
@@ -96,7 +96,8 @@
 
 // Inicio de la gramática
 goal
-	: compilationunit EOF{return $1}
+	: compilationunit EOF{return {AST:$1,"Cantidad":count, "Errores":errors }}
+	| EOF
 ;
 
 // Estructura léxica
@@ -123,6 +124,7 @@ primitivetype
 	| STRING {$$=$1}
 	| BOOLEAN {$$=$1}
 	| DOUBLE {$$=$1}
+
 ;
 
 classorinterfacetype
@@ -151,9 +153,10 @@ typedeclarations
 ;
 
 importdeclaration
-	:IMPORT name PUNTO_COMA {$$ = {clase: $2}}
-	|IMPORT name PUNTO MULTIPLICACION PUNTO_COMA {$$ = {clase: $2}}
-	| %empty
+	: %empty
+	| IMPORT name PUNTO_COMA {$$ = {clase: $2}}
+	| IMPORT name PUNTO MULTIPLICACION PUNTO_COMA {$$ = {clase: $2}}
+	| errorProd {$$=$1}
 ;
 
 typedeclaration
@@ -163,8 +166,7 @@ typedeclaration
 
 // Producciones para declarar clases
 classdeclaration
-	: CLASS IDENTIFICADOR LLAVE_APERTURA classbodydeclarations LLAVE_CIERRE 
-	{$$ = {nombre: $2, cuerpo: $4} }
+	: CLASS IDENTIFICADOR LLAVE_APERTURA classbodydeclarations LLAVE_CIERRE {$$ = {nombre: $2, cuerpo: $4} }
 ;
 
 classbodydeclarations
@@ -173,16 +175,17 @@ classbodydeclarations
 ;
 
 classbodydeclaration
-	: fielddeclaration {$$ = $1}
+	: %empty
+	| fielddeclaration {$$ = $1}
 	| methoddeclaration {$$= $1}
 	| constructordeclaration {$$= $1}
-	| %empty
 ;
 
 // Producciones para la declaraciones
 fielddeclaration
 	: type variabledeclarators PUNTO_COMA {$$ = {operacion: "declaracion", tipo: $1, declaradas: $2}}
 	| type variabledeclarators IGUAL expression PUNTO_COMA {$$ = {operacion: "declaracion_asign",tipo: $1, declaradas: $2, valor: $4}}
+	| errorProd{$$=$1}
 ;
 
 variabledeclarators
@@ -192,8 +195,7 @@ variabledeclarators
 
 variabledeclarator
 	: IDENTIFICADOR {$$ = $1}
-	| IDENTIFICADOR IGUAL expression {$$ = {variable:$1, valor: $3}}
-	
+	| IDENTIFICADOR IGUAL expression {$$ = {variable:$1, valor: $3}}	
 ;
 
 //Declaración de métodos
@@ -205,9 +207,9 @@ methoddeclaration
 ;
 
 formalparameterlist
-	: formalparameter{$$=[$1]}
+	: %empty
+	| formalparameter{$$=[$1]}
 	| formalparameterlist COMA formalparameter {$1.push($3);$$=$1}
-	| %empty
 ;
 
 formalparameter
@@ -242,20 +244,21 @@ blockstatements
 ;
 
 blockstatement
-	: localvariabledeclaration {$$=$1}
+	: %empty
+	| localvariabledeclaration {$$=$1}
 	| statement {$$=$1}
-	| %empty
 ;
 
 localvariabledeclaration
 	: type variabledeclarators PUNTO_COMA{$$={instruccion:"declaracion", declaradas: $2}}
 	| variabledeclarators PUNTO_COMA {$$={instruccion:"asignacion", asignadas: $1}}
+	| errorProd{$$=$1}
 ;
 
 statement
 	: statementwithouttrailingsubstatement {$$=$1}
-	| ifthenstatement {$$=$1}
-	| ifthenelsestatement {$$=$1}
+	| ifthenstatement {$$={instruccion:"if",instrucciones:$1}}
+	| ifthenelsestatement {$$={instruccion:"if",instrucciones:$1}}
 	| whilestatement{$$=$1}
 	| forstatement {$$=$1}
 	| printstatement {$$=$1}
@@ -265,11 +268,12 @@ printstatement
 	: IMPRIMIR PAR_APERTURA expression PAR_CIERRE PUNTO_COMA {$$={instruccion:$1, expresion: $3}}
 	| IMPRIMIR_L PAR_APERTURA expression PAR_CIERRE PUNTO_COMA{$$={instruccion:$1, expresion: $3}}
 	| IMPRIMIR_L PAR_APERTURA PAR_CIERRE PUNTO_COMA {$$={instruccion:$1, expresion: "\\n"}}
+	| errorProd{$$=$1}
 ;
 
 statementnoshortif
 	: statementwithouttrailingsubstatement {$$=$1}
-	| ifthenelsestatementnoshortif {$$=$1}
+	| ifthenelsestatementnoshortif {$$={instruccion:"if", instrucciones:$1}}
 	| whilestatementnoshortif {$$=$1}
 	| forstatementnoshortif {$$=$1}
 	| variabledeclarators PUNTO_COMA {$$=$1}
@@ -295,6 +299,7 @@ statementexpression
 	: postincrementexpression {$$=$1}
 	| postdecrementexpression {$$=$1}
 	| methodinvocation {$$=$1}
+	| errorProd{$$=$1}
 ;
 
 ifthenstatement
@@ -303,25 +308,24 @@ ifthenstatement
 ;
 
 ifthenelsestatement
-	:IF PAR_APERTURA expression PAR_CIERRE block ELSE elseifblocks
-	{$$={instruccion:$1, condicion:$3, instrucciones:$5, else:$2}}
+	:IF PAR_APERTURA expression PAR_CIERRE block elseifblocks
+	{$$={condicion:$3, instrucciones:$5, else:$6}}
 ;
 
 ifthenelsestatementnoshortif
-	: IF PAR_APERTURA expression PAR_CIERRE statementnoshortif elseifblock
-	{$$={instruccion:$1, condicion:$3, instrucciones:$5, else:$2}} 
+	: IF PAR_APERTURA expression PAR_CIERRE statementnoshortif elseifblocks
+	{$$={condicion:$3, instrucciones:$5, else: $6}} 
 ;
 
 elseifblocks
 	: elseifblock{$$=[$1]}
-	| elseifblocks elseifblock {$1.push($2);$$=$1} 
-	
+	| elseifblocks elseifblock {$1.push($2); $$={instruccion:"else",instrucciones:$1}}	
 ;
 
 elseifblock
-	: ELSE IF PAR_APERTURA expression PAR_CIERRE block{$$ = {condicion: $3, instrucciones: $2}} 
-	| ELSE block {$$ = {instrucciones: $2}}
-	| %empty
+	: %empty
+	| ELSE IF PAR_APERTURA expression PAR_CIERRE block{$$ = {instruccion: "else if",condicion: $4, instrucciones: $6}} 
+	| ELSE block {$$ = {instruccion:$1, instrucciones:$2}}	
 ;
 
 switchstatement
@@ -331,7 +335,7 @@ switchstatement
 
 switchblock
 	: LLAVE_APERTURA switchblockstatementgroups switchlabels LLAVE_CIERRE
-	{$$={etiqueta:$2}}
+	{$$={etiquetas:$2}}
 ;
 
 switchblockstatementgroups
@@ -383,8 +387,8 @@ forinit
 ;
 
 forupdate
-	: IDENTIFICADOR INCREMENTO {$$={operador:"++", operador:$1}}
-	| IDENTIFICADOR DECREMENTO {$$={operador:"--", operador:$1}}
+	: IDENTIFICADOR INCREMENTO {$$={operador:"++", operando:$1}}
+	| IDENTIFICADOR DECREMENTO {$$={operador:"--", operando:$1}}
 ;
 
 statementexpressionlist
@@ -398,11 +402,13 @@ breakstatement
 
 continuestatement
 	: CONTINUE PUNTO_COMA {$$ = {instruccion: $1}}
+	| errorProd {$$=$1}
 ;
 
 returnstatement
 	: RETURN expression PUNTO_COMA {$$= {instruccion: $1, valor: $2}}
 	| RETURN PUNTO_COMA {$$= {instruccion: $1, valor: "null"}}
+	| errorProd {$$=$1}
 ;
 
 // Producciones para expresion
@@ -413,9 +419,9 @@ primary
 ;
 
 argumentlist
-	: expression{$$=[$1]}
-	| argumentlist COMA expression {$1.push($3), $$=$1}
-	| %empty
+	: %empty
+	| expression{$$=[$1]}
+	| argumentlist COMA expression {$1.push($3), $$=$1}	
 ;
 
 methodinvocation
@@ -488,4 +494,9 @@ assignmentexpression
 
 expression
 	: assignmentexpression {$$=$1}
+;
+
+// Produccion de error
+errorProd
+    : error{$$= [$1]}
 ;

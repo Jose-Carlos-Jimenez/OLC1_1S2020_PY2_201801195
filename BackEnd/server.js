@@ -32,11 +32,10 @@ app.post('/parse', (req, res) =>
 {
     console.log("\n<---------------- INICIO DE ANÁLISIS ------------------->");
     var analyze = req.body.DATA;
-    //console.log(analyze);
     var ast = getAst(analyze.toString());
-    var respuesta = JSON.stringify(ast, null, 2);
-    res.send(respuesta);
-    console.log("\n<------------------ FIN DE ANÁLISIS -------------------->");   
+    var ans = JSON.stringify(ast, null, 2);
+    res.send(ans);
+    console.log("\n<------------------ FIN DE ANÁLISIS -------------------->");
 });
 
 app.get('/', (req, res) => 
@@ -52,7 +51,6 @@ function getAst(texto)
     try {
         // invocamos a nuestro parser con el contendio del archivo de entradas
         ast = parser.parse(texto);
-    
         // imrimimos en un archivo el contendio del AST en formato JSON
         //fs.writeFileSync('./ast.json', JSON.stringify(ast, null, 2));
         return ast;
