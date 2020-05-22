@@ -17,7 +17,7 @@
 "-"						return 'RESTA';
 "!="					return 'DISTINTO';
 "!"						return 'NOT';
-\"([^\\\"]|\\.)*\"				{ yytext = yytext.substr(1,yyleng-2); return 'LITERAL_STRING'; }
+\"([^\\\"\n]|\\.)*\"				{ yytext = yytext.substr(1,yyleng-2); return 'LITERAL_STRING'; }
 "%"						return 'MODULO';
 "&&"					return 'AND';
 "("						return 'PAR_APERTURA';
@@ -34,11 +34,6 @@
 "/"						return 'DIVISION';
 ":"						return 'DOS_PUNTOS';
 ";"						return 'PUNTO_COMA';
-"\""					return 'COMILLA_DOBLE';
-"\\"					return 'BARRA_INVERTIDA';
-"\n"					return 'SALTO_LINEA';
-"\r"					return 'RETORNO_CARROS';
-"\t"					return 'TABULACION';
 "^"						return 'POTENCIA';
 "{"						return 'LLAVE_APERTURA';
 "||"					return 'OR';
@@ -76,7 +71,7 @@
 "while"					return 'WHILE';
 ([a-zA-Z]|_)[a-zA-Z0-9_]*	return 'IDENTIFICADOR';
 <<EOF>>					return 'EOF';
-. 						{count++; errors.push("Error léxico en la fila" + yylloc.first_line + " carácter desconocido: " + yytext)}
+. 						{count++; errors.push("Error léxico en la fila" + yylloc.first_line + " carácter desconocido: " + yytext);}
 
 /lex
 
@@ -318,14 +313,13 @@ ifthenelsestatementnoshortif
 ;
 
 elseifblocks
-	: elseifblock{$$=[$1]}
-	| elseifblocks elseifblock {$1.push($2); $$={instruccion:"else",instrucciones:$1}}	
+	: elseifblock{$$=[$1];}
+	| elseifblocks elseifblock {$1.push($2); $$=$1;}
 ;
 
 elseifblock
-	: %empty
-	| ELSE IF PAR_APERTURA expression PAR_CIERRE block{$$ = {instruccion: "else if",condicion: $4, instrucciones: $6}} 
-	| ELSE block {$$ = {instruccion:$1, instrucciones:$2}}	
+	: ELSE IF PAR_APERTURA expression PAR_CIERRE block{$$ = {instruccion: "else if",condicion: $4, instrucciones: $6}} 
+	| ELSE block {$$ = {instruccion:$1, instrucciones:$2}}
 ;
 
 switchstatement
@@ -441,6 +435,7 @@ unaryexpression
 	: RESTA expression {$$={operador: $1, operando: $2}}
 	| unaryexpressionnotplusminus {$$ = $1}
 	| literal {$$=$1}
+	| errorProd{$$=$1}
 ;
 
 unaryexpressionnotplusminus

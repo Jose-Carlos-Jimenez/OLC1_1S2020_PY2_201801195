@@ -60,7 +60,7 @@ function addErrorConsole(json)
   var texto = '';
   for(var i in json.Errores)
   {
-    texto+=i +") " + json.Errores[i]+ '\n';
+    texto+="[" + i +"]----" + json.Errores[i]+ '\n';
   }
   console.log(texto);
   var myTextArea = $('#erroresT');
