@@ -44,3 +44,10 @@
 .renderjson .array.syntax {
 	color: lightsalmon;
 }
+
+#erroresT {
+	background-color: black;
+	color: yellow;
+	font-size:xx-small;
+	font-style: initial;
+}

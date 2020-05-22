@@ -76,7 +76,7 @@
 "while"					return 'WHILE';
 ([a-zA-Z]|_)[a-zA-Z0-9_]*	return 'IDENTIFICADOR';
 <<EOF>>					return 'EOF';
-. 						{count++; errors.push({"Lexema":yytext,"Columna":yylloc.first_column, "Fila":yylloc.first_line, "Descripcion":"Léxico"})}
+. 						{count++; errors.push("Error léxico en la fila" + yylloc.first_line + " carácter desconocido: " + yytext)}
 
 /lex
 

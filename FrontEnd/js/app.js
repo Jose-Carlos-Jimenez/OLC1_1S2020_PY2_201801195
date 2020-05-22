@@ -22,17 +22,16 @@ function getText() {
   })
   .then(function(res){return res.json();})
   .then(function(data){ 
-    console.log(data);
     treeView(data);
   });
 }
 
 function treeView(json)
 {
-  document.getElementById("treePlace").innerHTML = "";
   var render = renderjson(json.AST);
-  this.errores = json.Errores;
+  document.getElementById("treePlace").innerHTML = "";
   document.getElementById("treePlace").appendChild(render);
+  addErrorConsole(json);
 }
 
 function openFile(e) {
@@ -54,5 +53,19 @@ function displayContents(contents) {
   editor.getSession().setValue("");
   editor.getSession().setValue(contents);
 }
+
+
+function addErrorConsole(json)
+{
+  var texto = '';
+  for(var i in json.Errores)
+  {
+    texto+=i +") " + json.Errores[i]+ '\n';
+  }
+  console.log(texto);
+  var myTextArea = $('#erroresT');
+  myTextArea.val(texto);
+}
+
 
 document.getElementById('file-input').addEventListener('change', openFile, false);

@@ -273,7 +273,7 @@ var gramatica = (function () {
         defaultActions: { 3: [2, 2], 9: [2, 1], 33: [2, 11], 34: [2, 12], 35: [2, 13], 36: [2, 14], 37: [2, 15], 38: [2, 16], 39: [2, 17], 40: [2, 18], 174: [2, 91], 175: [2, 92], 177: [2, 131], 217: [2, 132], 233: [2, 119], 264: [2, 121], 265: [2, 122] },
         parseError: function parseError(str, hash) {
             errors.push(str);
-            count++;
+            count += 1;
             if (hash.recoverable) {
                 this.trace(str);
             } else {
@@ -283,8 +283,8 @@ var gramatica = (function () {
             }
         },
         parse: function parse(input) {
-            errors = [];
             count = 0;
+            errors = [];
             var self = this,
                 stack = [0],
                 tstack = [], // token stack
@@ -986,7 +986,7 @@ var gramatica = (function () {
                         break;
                     case 65: return 5;
                         break;
-                    case 66: count++; errors.push({ "Lexema": yy_.yytext, "Columna": yy_.yylloc.first_column, "Fila": yy_.yylloc.first_line, "Descripcion": "Léxico" })
+                    case 66: count++; errors.push("Error léxico en la fila" + yy_.yylloc.first_line + " carácter desconocido: " + yy_.yytext)
                         break;
                 }
             },
